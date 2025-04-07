@@ -15,61 +15,43 @@
         text-rendering: auto; line-height: 1; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
       }
       /* Basic styles */
-      body { overflow: hidden; } /* Prevent scrolling */
+      html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
       canvas { touch-action: none; cursor: crosshair; display: block; }
 
       /* Machine Styling */
       #machineBody {
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%); /* Light blue gradient */
-        border: 8px solid #7dd3fc; /* Sky blue border */
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+        border: 8px solid #7dd3fc;
         box-shadow: 0 10px 20px rgba(0,0,0,0.1), inset 0 0 15px rgba(255,255,255,0.6);
+        height: 100%; width: 100%; box-sizing: border-box;
       }
       .panel {
         background-color: rgba(255, 255, 255, 0.6);
         backdrop-filter: blur(5px);
-        border: 2px solid rgba(125, 211, 252, 0.5); /* Lighter sky blue */
+        border: 2px solid rgba(125, 211, 252, 0.5);
+        display: flex; flex-direction: column;
       }
       .char-button {
-        transition: all 0.2s ease-in-out;
-        border: 2px solid transparent;
+        transition: all 0.2s ease-in-out; border: 2px solid transparent;
       }
-      .char-button:hover {
-        transform: scale(1.05);
-        background-color: #fda4af; /* Pink hover */
-        color: white;
-      }
-      .char-button.selected {
-        background-color: #fb7185; /* Rose */
-        color: white;
-        border-color: #e11d48; /* Darker rose */
-        transform: scale(1.05);
-        box-shadow: 0 0 10px rgba(251, 113, 133, 0.7);
-      }
-      .char-button.completed {
-        background-color: #4ade80; /* Green */
-        color: white;
-        border-color: #22c55e; /* Darker green */
-        cursor: default; /* Indicate it's done for this cycle */
-        opacity: 0.8;
-      }
-       .char-button.completed:hover { /* Override hover for completed */
-         transform: scale(1);
-         background-color: #4ade80;
-       }
+      .char-button:hover { transform: scale(1.05); background-color: #fda4af; color: white; }
+      .char-button.selected { background-color: #fb7185; color: white; border-color: #e11d48; transform: scale(1.05); box-shadow: 0 0 10px rgba(251, 113, 133, 0.7); }
+      .char-button.completed { background-color: #4ade80; color: white; border-color: #22c55e; cursor: default; opacity: 0.8; }
+      .char-button.completed:hover { transform: scale(1); background-color: #4ade80; }
 
       /* Canvas & Ice Cream Area */
-      .canvas-container { position: relative; width: 100%; max-width: 400px; margin: 0 auto; aspect-ratio: 1 / 1; }
+      .canvas-container { position: relative; width: 100%; max-width: 400px; margin: 0 auto; aspect-ratio: 1 / 1; flex-shrink: 0; }
       #drawingCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; }
       #guideCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; visibility: hidden; z-index: 1; }
       #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 10; }
 
       #iceCreamDispenser {
-         background: linear-gradient(to bottom, #e2e8f0, #cbd5e1); /* Silver gradient */
-         border: 3px solid #94a3b8; /* Slate border */
-         box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
-         height: 200px; /* Increased height */
+         background: linear-gradient(to bottom, #e2e8f0, #cbd5e1); border: 3px solid #94a3b8;
+         box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); min-height: 180px; /* Adjusted min-height */
+         /* flex-grow: 1; Removed grow to make space for cart */
+         display: flex; align-items: center; justify-content: center; flex-shrink: 0; /* Prevent shrinking */
       }
-      #iceCreamContainer { position: relative; width: 80px; height: 180px; margin: 10px auto 0; } /* Centered */
+      #iceCreamContainer { position: relative; width: 80px; height: 180px; flex-shrink: 0; }
       .ice-cream-part { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); transition: all 0.5s ease-in-out; opacity: 0; }
       .ice-cream-part.visible { opacity: 1; }
       #cone { width: 0; height: 0; border-left: 30px solid transparent; border-right: 30px solid transparent; border-top: 60px solid #f59e0b; bottom: 0px; z-index: 1; }
@@ -79,6 +61,22 @@
       #scoop3 { background-color: #a16207; bottom: 115px; border: 1px solid #854d0e; }
       #sprinkles { width: 50px; height: 20px; bottom: 145px; z-index: 3; background-image: radial-gradient(#34d399 15%, transparent 16%), radial-gradient(#60a5fa 15%, transparent 16%), radial-gradient(#fb7185 15%, transparent 16%); background-size: 10px 10px; background-position: 0 0, 5px 5px, 10px 0px; background-repeat: repeat; }
       #cherry { width: 15px; height: 15px; background-color: #dc2626; border-radius: 50%; bottom: 165px; border: 1px solid #b91c1c; z-index: 4; }
+
+      /* Ice Cream Cart */
+      #iceCreamCartContainer {
+        flex-grow: 1; /* Allow cart to take remaining space */
+        overflow-y: auto; /* Add scroll if needed */
+        background-color: rgba(255, 255, 255, 0.3); /* Slightly visible background */
+        border-top: 2px dashed #94a3b8; /* Separator */
+      }
+      #iceCreamCart .cart-icon {
+        font-size: 2rem; /* Size of the emoji */
+        transition: transform 0.3s ease-out;
+      }
+      #iceCreamCart .cart-icon.added {
+         transform: scale(1.2); /* Pop effect */
+      }
+
 
       /* Particles & Popups */
       .particle { position: absolute; width: 8px; height: 8px; background-color: #fbbf24; border-radius: 50%; pointer-events: none; opacity: 1; transform: translate(-50%, -50%); transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
@@ -92,30 +90,30 @@
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gradient-to-br from-pink-300 via-purple-300 to-indigo-400 min-h-screen flex items-center justify-center p-4 font-['Baloo_2',_cursive] text-slate-800">
+<body class="font-['Baloo_2',_cursive] text-slate-800">
 
-    <div id="machineBody" class="w-full max-w-4xl rounded-3xl p-5 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+    <div id="machineBody" class="w-full h-full p-5 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-6 relative">
 
-        <div class="panel rounded-2xl p-4 md:col-span-1 order-2 md:order-1 h-[450px] overflow-y-auto">
-            <h2 class="text-2xl font-bold text-center mb-4 text-sky-700">Choose a Letter or Number!</h2>
-            <div id="charSelector" class="grid grid-cols-5 gap-2">
+        <div class="panel rounded-2xl p-4 md:col-span-1 order-2 md:order-1 h-full overflow-y-auto">
+            <h2 class="text-2xl font-bold text-center mb-4 text-sky-700 flex-shrink-0">Choose a Letter or Number!</h2>
+            <div id="charSelector" class="grid grid-cols-5 gap-2 flex-grow">
                 </div>
         </div>
 
-        <div class="panel rounded-2xl p-4 md:col-span-1 order-1 md:order-2 flex flex-col items-center">
-            <h2 class="text-2xl font-bold text-center mb-4 text-sky-700">Draw Here!</h2>
+        <div class="panel rounded-2xl p-4 md:col-span-1 order-1 md:order-2 flex flex-col items-center h-full">
+            <h2 class="text-2xl font-bold text-center mb-4 text-sky-700 flex-shrink-0">Draw Here!</h2>
             <div class="canvas-container mb-4">
                 <canvas id="drawingCanvas" class="bg-white rounded-2xl shadow-inner border-4 border-blue-300"></canvas>
                 <canvas id="guideCanvas"></canvas>
                 <div id="overlay"></div>
             </div>
-             <button id="clearBtn" class="lucide bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105 mt-auto" aria-label="Clear Drawing">
+             <button id="clearBtn" class="lucide bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105 mt-auto flex-shrink-0" aria-label="Clear Drawing">
                 &#xe51b; Clear
             </button>
         </div>
 
-        <div class="panel rounded-2xl p-4 md:col-span-1 order-3 flex flex-col items-center">
-             <h2 class="text-2xl font-bold text-center mb-4 text-sky-700">Your Ice Cream!</h2>
+        <div class="panel rounded-2xl p-4 md:col-span-1 order-3 flex flex-col items-center h-full">
+             <h2 class="text-2xl font-bold text-center mb-4 text-sky-700 flex-shrink-0">Your Ice Cream!</h2>
              <div id="iceCreamDispenser" class="w-full rounded-xl mt-4">
                  <div id="iceCreamContainer">
                     <div id="cone" class="ice-cream-part"></div>
@@ -125,6 +123,11 @@
                     <div id="sprinkles" class="ice-cream-part"></div>
                     <div id="cherry" class="ice-cream-part"></div>
                 </div>
+             </div>
+             <div id="iceCreamCartContainer" class="w-full mt-4 rounded-lg p-2">
+                 <h3 class="text-lg font-bold text-center mb-2 text-slate-600">Collected Treats</h3>
+                 <div id="iceCreamCart" class="flex flex-wrap gap-2 justify-center items-center">
+                     </div>
              </div>
         </div>
     </div>
@@ -137,7 +140,8 @@
         const overlay = document.getElementById('overlay');
         const canvasContainer = document.querySelector('.canvas-container');
         const clearBtn = document.getElementById('clearBtn');
-        const charSelector = document.getElementById('charSelector'); // Button container
+        const charSelector = document.getElementById('charSelector');
+        const iceCreamCart = document.getElementById('iceCreamCart'); // Get cart element
 
         // Ice cream elements
         const iceCreamParts = { cone: document.getElementById('cone'), scoop1: document.getElementById('scoop1'), scoop2: document.getElementById('scoop2'), scoop3: document.getElementById('scoop3'), sprinkles: document.getElementById('sprinkles'), cherry: document.getElementById('cherry') };
@@ -148,280 +152,190 @@
         const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split('');
         const rewardWords = ["Yes!", "Wow!", "Super!", "Yeah!", "Nice!", "Great!"];
         const rewardEmojis = ["👏", "👍", "🎉", "✨"];
-        let currentCharacterIndex = -1; // Start with no character selected
+        let currentCharacterIndex = -1;
         let isDrawing = false;
         let userPathPoints = [];
         let startX = 0, startY = 0, lastX = 0, lastY = 0;
         const lineWidth = 12;
         const lineColor = '#333';
         const guideColorVisible = '#e5e7eb';
-        const guideColorHidden = [0, 0, 255, 255]; // RGBA for solid blue
+        const guideColorHidden = [0, 0, 255, 255];
         const guideFontSizeRatio = 0.7;
         const minDrawDistance = 10;
         const accuracyThreshold = 0.85;
         const sampleRate = 5;
         const checkRadius = 3;
         let iceCreamProgress = 0;
-        let completedCharacters = new Set(); // Track completed chars in this cycle
+        let completedCharacters = new Set(); // This Set will now persist across ice creams
+        let totalIceCreamsMade = 0;
 
         // --- Initialization ---
         function initialize() {
             createCharacterButtons();
-            resizeCanvas(); // Initial resize
             updateIceCreamVisual(iceCreamProgress);
             selectCharacter(0); // Select 'A' by default
             window.addEventListener('resize', resizeCanvas);
-
-             // Add event listener for clear button
-             clearBtn.addEventListener('click', () => {
-                if (currentCharacterIndex !== -1) {
-                    clearUserDrawing();
-                }
-             });
+            clearBtn.addEventListener('click', () => {
+                if (currentCharacterIndex !== -1) { clearUserDrawing(); }
+            });
         }
 
         // --- Character Selection ---
-        function createCharacterButtons() {
+        function createCharacterButtons() { /* ... (same as before) ... */
             characters.forEach((char, index) => {
-                const button = document.createElement('button');
-                button.textContent = char;
-                button.dataset.index = index; // Store index in data attribute
+                const button = document.createElement('button'); button.textContent = char; button.dataset.index = index;
                 button.classList.add('char-button', 'p-2', 'rounded-lg', 'font-bold', 'text-xl', 'bg-white', 'shadow-md', 'border-2', 'border-slate-300');
-                button.addEventListener('click', () => selectCharacter(index));
-                charSelector.appendChild(button);
+                button.addEventListener('click', () => selectCharacter(index)); charSelector.appendChild(button);
             });
         }
-
-        function selectCharacter(index) {
+        function selectCharacter(index) { /* ... (same as before) ... */
             if (index < 0 || index >= characters.length) return;
-
-            // Remove 'selected' from previous button
             const currentButton = charSelector.querySelector(`.char-button.selected`);
-            if (currentButton) {
-                currentButton.classList.remove('selected');
-            }
-
-             // Add 'selected' to new button
-             const newButton = charSelector.querySelector(`.char-button[data-index="${index}"]`);
-             if (newButton) {
-                 newButton.classList.add('selected');
-             }
-
-            currentCharacterIndex = index;
-            updateCharacter(); // Update canvas and clear path
+            if (currentButton) { currentButton.classList.remove('selected'); }
+            const newButton = charSelector.querySelector(`.char-button[data-index="${index}"]`);
+            if (newButton) { newButton.classList.add('selected'); }
+            currentCharacterIndex = index; resizeCanvas(); updateCharacter();
         }
-
-        function updateCharacterButtonStates() {
+        function updateCharacterButtonStates() { /* ... (same as before) ... */
              const buttons = charSelector.querySelectorAll('.char-button');
              buttons.forEach(button => {
-                 const index = parseInt(button.dataset.index);
-                 button.classList.remove('selected', 'completed'); // Clear states first
-
-                 if (completedCharacters.has(index)) {
-                     button.classList.add('completed');
-                 }
-                 if (index === currentCharacterIndex) {
-                     button.classList.add('selected');
-                 }
+                 const index = parseInt(button.dataset.index); button.classList.remove('selected', 'completed');
+                 if (completedCharacters.has(index)) { button.classList.add('completed'); } // Apply completed based on persistent Set
+                 if (index === currentCharacterIndex) { button.classList.add('selected'); }
              });
         }
 
-
         // --- Canvas Setup & Resizing ---
-        function resizeCanvas() {
-            const containerWidth = canvasContainer.clientWidth;
-            const containerHeight = canvasContainer.clientHeight;
-
-            [canvas, guideCanvas].forEach(c => {
-                c.width = containerWidth; c.height = containerHeight;
-                c.style.width = `${containerWidth}px`; c.style.height = `${containerHeight}px`;
-            });
-            overlay.style.width = `${containerWidth}px`; overlay.style.height = `${containerHeight}px`;
-
-            const fontStyle = `${canvas.height * guideFontSizeRatio}px 'Baloo 2', cursive`;
-            [ctx, guideCtx].forEach(context => {
-                 context.font = fontStyle; context.textBaseline = 'middle'; context.textAlign = 'center';
-            });
-
-            if (currentCharacterIndex !== -1) {
-                 drawGuideCharacter(); // Redraw if a character is selected
-            }
+        function resizeCanvas() { /* ... (same as before) ... */
+            const availableWidth = canvasContainer.clientWidth; const canvasSize = availableWidth;
+            canvas.width = canvasSize; canvas.height = canvasSize; guideCanvas.width = canvasSize; guideCanvas.height = canvasSize;
+            canvas.style.width = `${canvasSize}px`; canvas.style.height = `${canvasSize}px`; guideCanvas.style.width = `${canvasSize}px`; guideCanvas.style.height = `${canvasSize}px`;
+            overlay.style.width = `${canvasSize}px`; overlay.style.height = `${canvasSize}px`;
+            const fontStyle = `${canvasSize * guideFontSizeRatio}px 'Baloo 2', cursive`;
+            [ctx, guideCtx].forEach(context => { context.font = fontStyle; context.textBaseline = 'middle'; context.textAlign = 'center'; });
+            if (currentCharacterIndex !== -1) { drawGuideCharacter(); }
         }
 
         // --- Drawing Logic ---
-        function startDrawing(e) {
-            if (currentCharacterIndex === -1) return; // Don't draw if no char selected
-            isDrawing = true;
-            userPathPoints = [];
-            [startX, startY] = getPointerPosition(e);
-            [lastX, lastY] = [startX, startY];
-            userPathPoints.push({ x: startX, y: startY });
+        function startDrawing(e) { /* ... (same as before) ... */
+            if (currentCharacterIndex === -1) return; isDrawing = true; userPathPoints = [];
+            [startX, startY] = getPointerPosition(e); [lastX, lastY] = [startX, startY]; userPathPoints.push({ x: startX, y: startY });
         }
-
-        function draw(e) {
+        function draw(e) { /* ... (same as before) ... */
             if (!isDrawing || currentCharacterIndex === -1) return;
             const [currentX, currentY] = getPointerPosition(e);
-            ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(currentX, currentY);
-            ctx.strokeStyle = lineColor; ctx.lineWidth = lineWidth; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-            ctx.stroke();
-            userPathPoints.push({ x: currentX, y: currentY });
-            createParticle(currentX, currentY);
-            [lastX, lastY] = [currentX, currentY];
+            ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(currentX, currentY); ctx.strokeStyle = lineColor; ctx.lineWidth = lineWidth; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+            userPathPoints.push({ x: currentX, y: currentY }); createParticle(currentX, currentY); [lastX, lastY] = [currentX, currentY];
         }
-
-        function stopDrawing(e) {
-            if (!isDrawing || currentCharacterIndex === -1) return;
-            isDrawing = false;
-            const [endX, endY] = getPointerPosition(e);
-            const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
-            if (distance >= minDrawDistance && userPathPoints.length > 1) {
-                checkAccuracy();
-            }
-            ctx.beginPath();
+        function stopDrawing(e) { /* ... (same as before) ... */
+            if (!isDrawing || currentCharacterIndex === -1) return; isDrawing = false;
+            const [endX, endY] = getPointerPosition(e); const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+            if (distance >= minDrawDistance && userPathPoints.length > 1) { checkAccuracy(); } ctx.beginPath();
         }
-
-        function getPointerPosition(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.clientX ?? e.touches?.[0]?.clientX;
-            const clientY = e.clientY ?? e.touches?.[0]?.clientY;
-            if (clientX === undefined || clientY === undefined) {
-                 if (e.offsetX && e.offsetY) return [e.offsetX, e.offsetY];
-                 return [lastX, lastY];
-            }
+        function getPointerPosition(e) { /* ... (same as before) ... */
+            const rect = canvas.getBoundingClientRect(); const clientX = e.clientX ?? e.touches?.[0]?.clientX; const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+            if (clientX === undefined || clientY === undefined) { if (e.offsetX && e.offsetY) return [e.offsetX, e.offsetY]; return [lastX, lastY]; }
             const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height;
             let x = (clientX - rect.left) * scaleX; let y = (clientY - rect.top) * scaleY;
-            x = Math.max(0, Math.min(canvas.width, x)); y = Math.max(0, Math.min(canvas.height, y));
-            return [x, y];
+            x = Math.max(0, Math.min(canvas.width, x)); y = Math.max(0, Math.min(canvas.height, y)); return [x, y];
         }
 
         // --- Particle Effect ---
         function createParticle(x, y) { /* ... (same as before) ... */
-             const particle = document.createElement('div'); particle.classList.add('particle');
-             particle.style.left = `${(x / canvas.width) * 100}%`; particle.style.top = `${(y / canvas.height) * 100}%`;
-             overlay.appendChild(particle);
-             setTimeout(() => { particle.style.opacity = '0'; particle.style.transform = 'translate(-50%, -50%) scale(0)'; }, 10);
-             setTimeout(() => particle.remove(), 510);
+             const particle = document.createElement('div'); particle.classList.add('particle'); particle.style.left = `${(x / canvas.width) * 100}%`; particle.style.top = `${(y / canvas.height) * 100}%`; overlay.appendChild(particle);
+             setTimeout(() => { particle.style.opacity = '0'; particle.style.transform = 'translate(-50%, -50%) scale(0)'; }, 10); setTimeout(() => particle.remove(), 510);
         }
 
         // --- Character Logic ---
-        function drawGuideCharacter() {
-            if (currentCharacterIndex === -1) return; // Exit if no character selected
-            const char = characters[currentCharacterIndex];
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            guideCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
-            // Visible guide
-            ctx.fillStyle = guideColorVisible;
-            ctx.fillText(char, canvas.width / 2, canvas.height / 2);
-            // Hidden guide (filled)
-            guideCtx.fillStyle = `rgba(${guideColorHidden.join(',')})`;
-            guideCtx.fillText(char, guideCanvas.width / 2, guideCanvas.height / 2);
+        function drawGuideCharacter() { /* ... (same as before) ... */
+            if (currentCharacterIndex === -1) return; const char = characters[currentCharacterIndex];
+            ctx.clearRect(0, 0, canvas.width, canvas.height); guideCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+            ctx.fillStyle = guideColorVisible; ctx.fillText(char, canvas.width / 2, canvas.height / 2);
+            guideCtx.fillStyle = `rgba(${guideColorHidden.join(',')})`; guideCtx.fillText(char, guideCanvas.width / 2, guideCanvas.height / 2);
         }
-
-        function updateCharacter() {
-            userPathPoints = []; // Clear path
-            drawGuideCharacter(); // Draw new guides
-            overlay.innerHTML = ''; // Clear effects
-            updateCharacterButtonStates(); // Update button visuals
+        function updateCharacter() { /* ... (same as before) ... */
+            userPathPoints = []; drawGuideCharacter(); overlay.innerHTML = ''; updateCharacterButtonStates();
         }
-
-        function clearUserDrawing() {
-            userPathPoints = [];
-             // Only clear the user's drawing from the visible canvas by redrawing the guide
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (currentCharacterIndex !== -1) {
-                 ctx.fillStyle = guideColorVisible;
-                 ctx.fillText(characters[currentCharacterIndex], canvas.width / 2, canvas.height / 2);
-            }
-            overlay.innerHTML = ''; // Clear effects
+        function clearUserDrawing() { /* ... (same as before) ... */
+            userPathPoints = []; ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (currentCharacterIndex !== -1) { ctx.fillStyle = guideColorVisible; ctx.fillText(characters[currentCharacterIndex], canvas.width / 2, canvas.height / 2); }
+            overlay.innerHTML = '';
         }
-
 
         // --- Accuracy Check ---
-        function checkAccuracy() {
+        function checkAccuracy() { /* ... (same as before) ... */
             let accuratePoints = 0; let sampledPoints = 0;
             if (userPathPoints.length < sampleRate) { showTryAgainMessage(); return; }
-
-            for (let i = 0; i < userPathPoints.length; i += sampleRate) {
-                sampledPoints++;
-                if (isPointNearGuide(userPathPoints[i].x, userPathPoints[i].y)) {
-                    accuratePoints++;
-                }
-            }
+            for (let i = 0; i < userPathPoints.length; i += sampleRate) { sampledPoints++; if (isPointNearGuide(userPathPoints[i].x, userPathPoints[i].y)) { accuratePoints++; } }
             const accuracy = sampledPoints > 0 ? accuratePoints / sampledPoints : 0;
-
             if (accuracy >= accuracyThreshold) {
-                showReward(); // Instant feedback
-
-                // Check if this character was already completed in this cycle
-                if (!completedCharacters.has(currentCharacterIndex)) {
-                    completedCharacters.add(currentCharacterIndex);
-                    updateCharacterButtonStates(); // Mark button as completed
-                    advanceIceCream(); // Advance the ice cream state
-                } else {
-                    // Optional: Add feedback like "You already did this one!"
-                }
-            } else {
-                showTryAgainMessage();
-            }
+                showReward();
+                if (!completedCharacters.has(currentCharacterIndex)) { completedCharacters.add(currentCharacterIndex); updateCharacterButtonStates(); advanceIceCream(); }
+            } else { showTryAgainMessage(); }
         }
-
         function isPointNearGuide(x, y) { /* ... (same as before) ... */
             const startX = Math.max(0, Math.floor(x) - checkRadius); const startY = Math.max(0, Math.floor(y) - checkRadius);
             const width = Math.min(guideCanvas.width - startX, checkRadius * 2 + 1); const height = Math.min(guideCanvas.height - startY, checkRadius * 2 + 1);
             if (width <= 0 || height <= 0) return false;
             try {
                 const imageData = guideCtx.getImageData(startX, startY, width, height).data;
-                for (let i = 0; i < imageData.length; i += 4) {
-                    if (imageData[i] === guideColorHidden[0] && imageData[i + 1] === guideColorHidden[1] && imageData[i + 2] === guideColorHidden[2]) {
-                        return true;
-                    }
-                }
-            } catch (e) { console.error("Error reading guide canvas data:", e); return false; }
-            return false;
+                for (let i = 0; i < imageData.length; i += 4) { if (imageData[i] === guideColorHidden[0] && imageData[i + 1] === guideColorHidden[1] && imageData[i + 2] === guideColorHidden[2]) { return true; } }
+            } catch (e) { console.error("Error reading guide canvas data:", e); return false; } return false;
         }
 
         // --- Reward Logic ---
         function showReward() { /* ... (same as before) ... */
             const word = rewardWords[Math.floor(Math.random() * rewardWords.length)]; const emoji = rewardEmojis[Math.floor(Math.random() * rewardEmojis.length)];
-            const rewardPopup = document.createElement('div'); rewardPopup.classList.add('reward-popup');
-            rewardPopup.textContent = `${word} ${emoji}`; overlay.appendChild(rewardPopup);
-            setTimeout(() => rewardPopup.remove(), 800);
+            const rewardPopup = document.createElement('div'); rewardPopup.classList.add('reward-popup'); rewardPopup.textContent = `${word} ${emoji}`; overlay.appendChild(rewardPopup); setTimeout(() => rewardPopup.remove(), 800);
         }
         function showTryAgainMessage() { /* ... (same as before) ... */
-            const tryAgainPopup = document.createElement('div'); tryAgainPopup.classList.add('try-again-popup');
-            tryAgainPopup.textContent = "Try Again!"; overlay.appendChild(tryAgainPopup);
-            setTimeout(() => tryAgainPopup.remove(), 1000);
+            const tryAgainPopup = document.createElement('div'); tryAgainPopup.classList.add('try-again-popup'); tryAgainPopup.textContent = "Try Again!"; overlay.appendChild(tryAgainPopup); setTimeout(() => tryAgainPopup.remove(), 1000);
         }
 
         // --- Ice Cream Logic ---
-        function advanceIceCream() { // Only called on NEW successful trace
+        function advanceIceCream() {
             if (iceCreamProgress < MAX_ICE_CREAM_PROGRESS) {
                 iceCreamProgress++;
                 updateIceCreamVisual(iceCreamProgress);
 
+                // Check if ice cream is now complete
                 if (iceCreamProgress === MAX_ICE_CREAM_PROGRESS) {
                     showYummyMessage();
+                    addIceCreamToCart(); // Add to cart BEFORE resetting
+                    totalIceCreamsMade++; // Increment overall counter
+
+                    // Reset after a delay
                     setTimeout(() => {
                         iceCreamProgress = 0;
-                        completedCharacters.clear(); // Reset completed characters
-                        updateIceCreamVisual(0); // Reset visual
-                        updateCharacterButtonStates(); // Reset button states
-                    }, 2000);
+                        // completedCharacters.clear(); // <<<< THIS LINE IS REMOVED >>>>
+                        updateIceCreamVisual(0); // Reset visual display
+                        updateCharacterButtonStates(); // Reset button states (will keep completed ones green)
+                    }, 1500);
                 }
             }
         }
 
         function updateIceCreamVisual(progress) { /* ... (same as before) ... */
-             iceCreamOrder.forEach((partId, index) => {
-                 if (iceCreamParts[partId]) {
-                     iceCreamParts[partId].classList.toggle('visible', index < progress);
-                 }
-             });
+             iceCreamOrder.forEach((partId, index) => { if (iceCreamParts[partId]) { iceCreamParts[partId].classList.toggle('visible', index < progress); } });
         }
         function showYummyMessage() { /* ... (same as before) ... */
-             const yummyPopup = document.createElement('div'); yummyPopup.id = 'yummyText';
-             yummyPopup.textContent = "Yummy!"; overlay.appendChild(yummyPopup);
-             setTimeout(() => yummyPopup.remove(), 1500);
+             const yummyPopup = document.createElement('div'); yummyPopup.id = 'yummyText'; yummyPopup.textContent = "Yummy!"; overlay.appendChild(yummyPopup); setTimeout(() => yummyPopup.remove(), 1500);
+        }
+
+        // --- Cart Function ---
+        function addIceCreamToCart() {
+            const cartIcon = document.createElement('span');
+            cartIcon.textContent = '🍦'; // Ice cream emoji
+            cartIcon.classList.add('cart-icon');
+            iceCreamCart.appendChild(cartIcon);
+
+            // Add a little animation effect
+             setTimeout(() => {
+                 cartIcon.classList.add('added');
+             }, 50); // Apply slightly after adding
+             setTimeout(() => {
+                 cartIcon.classList.remove('added');
+             }, 350); // Remove after animation duration
         }
 
         // --- Event Listeners ---
