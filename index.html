@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Alphabet & Number Tracing Fun!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @font-face {
+        font-family: 'LucideIcons';
+        src: url('https://cdn.jsdelivr.net/npm/lucide-static@latest/font/Lucide.ttf') format('truetype');
+      }
+      .lucide {
+        font-family: 'LucideIcons';
+        font-style: normal;
+        font-weight: normal;
+        font-variant: normal;
+        text-rendering: auto;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      /* Basic styles for drawing */
+      canvas {
+        touch-action: none; /* Prevent scrolling while drawing on canvas */
+        cursor: crosshair;
+        display: block; /* Remove extra space below canvas */
+      }
+      /* Container for canvas and overlays */
+      .canvas-container {
+          position: relative;
+          width: 100%; /* Take available width */
+          max-width: 500px; /* Max width constraint - adjusted slightly */
+          margin: 0 auto; /* Center the container */
+          aspect-ratio: 1 / 1; /* Maintain square aspect ratio */
+      }
+      #drawingCanvas {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+      }
+      /* Overlay for particles and rewards */
+      #overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none; /* Allow clicks/touches to pass through */
+          overflow: hidden; /* Keep particles inside */
+          z-index: 10; /* Ensure overlay is above canvas */
+      }
+
+      /* Style for drawing particles */
+      .particle {
+          position: absolute;
+          width: 8px;
+          height: 8px;
+          background-color: #fbbf24; /* Amber color */
+          border-radius: 50%;
+          pointer-events: none;
+          opacity: 1;
+          transform: translate(-50%, -50%); /* Center particle on cursor */
+          transition: opacity 0.5s ease-out, transform 0.5s ease-out; /* Fade and shrink out */
+      }
+
+      /* Style for reward text/emoji */
+      .reward-popup {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) scale(0.5); /* Start small */
+          color: #ec4899; /* Pink */
+          font-size: 2.5rem; /* Slightly smaller */
+          font-weight: bold;
+          opacity: 0;
+          pointer-events: none;
+          text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+          animation: reward-appear 0.8s ease-out forwards;
+          z-index: 20; /* Above particles */
+      }
+
+      @keyframes reward-appear {
+          0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+          60% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; } /* Adjusted scale */
+          100% { transform: translate(-50%, -50%) scale(1); opacity: 0; } /* Fade out at the end */
+      }
+
+      /* --- Ice Cream Styles --- */
+      #iceCreamContainer {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 80px; /* Adjust size as needed */
+        height: 150px; /* Adjust size as needed */
+        z-index: 5; /* Below overlay popups but above background */
+      }
+
+      .ice-cream-part {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        opacity: 0; /* Hidden by default */
+      }
+
+      .ice-cream-part.visible {
+        opacity: 1;
+      }
+
+      #cone {
+        width: 0;
+        height: 0;
+        border-left: 30px solid transparent;
+        border-right: 30px solid transparent;
+        border-top: 60px solid #f59e0b; /* Amber 600 for cone color */
+        bottom: 0px; /* Position at the very bottom */
+        z-index: 1;
+      }
+
+      .scoop {
+        width: 55px; /* Slightly wider than cone top */
+        height: 55px;
+        border-radius: 50%;
+        z-index: 2;
+      }
+
+      #scoop1 { /* Vanilla */
+        background-color: #fff7d0; /* Light yellow/cream */
+        bottom: 45px; /* Position above cone */
+        border: 1px solid #fef08a; /* Slightly darker border */
+      }
+
+      #scoop2 { /* Strawberry */
+        background-color: #fda4af; /* Pink */
+        bottom: 80px; /* Position above scoop 1 */
+        border: 1px solid #f472b6;
+      }
+
+       #scoop3 { /* Chocolate */
+        background-color: #a16207; /* Brown */
+        bottom: 115px; /* Position above scoop 2 */
+        border: 1px solid #854d0e;
+      }
+
+      #sprinkles {
+        width: 50px;
+        height: 20px; /* Area for sprinkles on top scoop */
+        bottom: 145px; /* On top of scoop 3 */
+        z-index: 3;
+        /* Use background radial gradients for sprinkles effect */
+        background-image: radial-gradient(#34d399 15%, transparent 16%), /* Green */
+                          radial-gradient(#60a5fa 15%, transparent 16%), /* Blue */
+                          radial-gradient(#fb7185 15%, transparent 16%); /* Rose */
+        background-size: 10px 10px;
+        background-position: 0 0, 5px 5px, 10px 0px;
+        background-repeat: repeat;
+      }
+
+       #cherry {
+        width: 15px;
+        height: 15px;
+        background-color: #dc2626; /* Red */
+        border-radius: 50%;
+        bottom: 160px; /* On top of sprinkles */
+        border: 1px solid #b91c1c;
+        z-index: 4;
+      }
+
+      /* Yummy animation */
+       #yummyText {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) scale(0);
+          font-size: 2rem;
+          color: #16a34a; /* Green */
+          font-weight: bold;
+          opacity: 0;
+          animation: yummy-appear 1.5s ease-out forwards;
+          z-index: 30; /* Highest */
+       }
+
+       @keyframes yummy-appear {
+          0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+          50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+          100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+       }
+
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-sky-200 via-blue-300 to-indigo-400 min-h-screen flex flex-col items-center justify-center p-4 font-['Baloo_2',_cursive] text-slate-800 overflow-hidden">
+
+    <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-6 md:p-10 w-full max-w-3xl text-center relative">
+
+        <div id="iceCreamContainer">
+            <div id="cone" class="ice-cream-part"></div>
+            <div id="scoop1" class="ice-cream-part scoop"></div>
+            <div id="scoop2" class="ice-cream-part scoop"></div>
+            <div id="scoop3" class="ice-cream-part scoop"></div>
+            <div id="sprinkles" class="ice-cream-part"></div>
+            <div id="cherry" class="ice-cream-part"></div>
+        </div>
+
+        <h1 class="text-3xl md:text-5xl font-bold mb-6 text-indigo-600">Let's Write!</h1>
+
+        <div class="mb-4 flex items-center justify-center">
+            <div class="canvas-container">
+                <canvas id="drawingCanvas" class="bg-white rounded-2xl shadow-inner border-4 border-blue-300"></canvas>
+                <div id="overlay"></div>
+            </div>
+        </div>
+
+        <div class="flex justify-center items-center space-x-4 mt-6">
+            <button id="prevBtn" class="lucide bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 px-5 rounded-full shadow-lg transition duration-200 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Previous Character">
+                &#xe4b2; </button>
+            <button id="clearBtn" class="lucide bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-5 rounded-full shadow-lg transition duration-200 ease-in-out transform hover:scale-105" aria-label="Clear Drawing">
+                &#xe51b; </button>
+            <button id="nextBtn" class="lucide bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-5 rounded-full shadow-lg transition duration-200 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Next Character">
+                &#xe4b4; </button>
+        </div>
+
+    </div>
+
+    <script>
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        const overlay = document.getElementById('overlay');
+        const canvasContainer = document.querySelector('.canvas-container');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        // Ice cream elements
+        const iceCreamParts = {
+            cone: document.getElementById('cone'),
+            scoop1: document.getElementById('scoop1'),
+            scoop2: document.getElementById('scoop2'),
+            scoop3: document.getElementById('scoop3'),
+            sprinkles: document.getElementById('sprinkles'),
+            cherry: document.getElementById('cherry')
+        };
+        const iceCreamOrder = ['cone', 'scoop1', 'scoop2', 'scoop3', 'sprinkles', 'cherry'];
+        const MAX_ICE_CREAM_PROGRESS = iceCreamOrder.length;
+
+        // --- Configuration ---
+        const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split('');
+        const rewardWords = ["Yes!", "Wow!", "Super!", "Yeah!", "Nice!", "Great!"];
+        const rewardEmojis = ["👏", "👍", "🎉", "✨"];
+        let currentCharacterIndex = 0;
+        let isDrawing = false;
+        let startX = 0, startY = 0, lastX = 0, lastY = 0;
+        const lineWidth = 12;
+        const lineColor = '#333';
+        const guideColor = '#e5e7eb';
+        const guideFontSizeRatio = 0.7;
+        const minDrawDistance = 10;
+        let iceCreamProgress = 0; // 0 = nothing, 1 = cone, ..., 6 = cherry
+
+        // --- Canvas Setup ---
+        function resizeCanvas() {
+            const containerWidth = canvasContainer.clientWidth;
+            const containerHeight = canvasContainer.clientHeight;
+            canvas.width = containerWidth;
+            canvas.height = containerHeight;
+            canvas.style.width = `${containerWidth}px`;
+            canvas.style.height = `${containerHeight}px`;
+            overlay.style.width = `${containerWidth}px`;
+            overlay.style.height = `${containerHeight}px`;
+            ctx.font = `${canvas.height * guideFontSizeRatio}px 'Baloo 2', cursive`;
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center';
+            drawGuideCharacter();
+        }
+
+        // --- Drawing Logic ---
+        function startDrawing(e) {
+            isDrawing = true;
+            [startX, startY] = getPointerPosition(e);
+            [lastX, lastY] = [startX, startY];
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const [currentX, currentY] = getPointerPosition(e);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(currentX, currentY);
+            ctx.strokeStyle = lineColor;
+            ctx.lineWidth = lineWidth;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+            createParticle(currentX, currentY);
+            [lastX, lastY] = [currentX, currentY];
+        }
+
+        function stopDrawing(e) {
+            if (!isDrawing) return;
+            isDrawing = false;
+            const [endX, endY] = getPointerPosition(e);
+            const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+
+            if (distance >= minDrawDistance) {
+                showReward(); // Trigger instant popup
+                advanceIceCream(); // Advance the ice cream progress
+            }
+            ctx.beginPath();
+        }
+
+        function getPointerPosition(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.clientX ?? e.touches?.[0]?.clientX;
+            const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+            if (clientX === undefined || clientY === undefined) {
+                 if (e.offsetX && e.offsetY) return [e.offsetX, e.offsetY];
+                 return [lastX, lastY];
+            }
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let x = (clientX - rect.left) * scaleX;
+            let y = (clientY - rect.top) * scaleY;
+            x = Math.max(0, Math.min(canvas.width, x));
+            y = Math.max(0, Math.min(canvas.height, y));
+            return [x, y];
+        }
+
+        // --- Particle Effect ---
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            particle.style.left = `${(x / canvas.width) * 100}%`;
+            particle.style.top = `${(y / canvas.height) * 100}%`;
+            overlay.appendChild(particle);
+            setTimeout(() => {
+                particle.style.opacity = '0';
+                particle.style.transform = 'translate(-50%, -50%) scale(0)';
+            }, 10);
+            setTimeout(() => particle.remove(), 510);
+        }
+
+        // --- Character Logic ---
+        function drawGuideCharacter() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = guideColor;
+            ctx.font = `${canvas.height * guideFontSizeRatio}px 'Baloo 2', cursive`;
+            ctx.fillText(characters[currentCharacterIndex], canvas.width / 2, canvas.height / 2);
+        }
+
+        function updateCharacter() {
+            drawGuideCharacter();
+            prevBtn.disabled = currentCharacterIndex === 0;
+            nextBtn.disabled = currentCharacterIndex === characters.length - 1;
+            overlay.innerHTML = ''; // Clear popups/particles
+        }
+
+        function clearCanvas() {
+            drawGuideCharacter();
+            overlay.innerHTML = '';
+        }
+
+        // --- Reward Logic ---
+        function showReward() {
+            const word = rewardWords[Math.floor(Math.random() * rewardWords.length)];
+            const emoji = rewardEmojis[Math.floor(Math.random() * rewardEmojis.length)];
+            const rewardPopup = document.createElement('div');
+            rewardPopup.classList.add('reward-popup');
+            rewardPopup.textContent = `${word} ${emoji}`;
+            overlay.appendChild(rewardPopup);
+            setTimeout(() => rewardPopup.remove(), 800);
+        }
+
+        // --- Ice Cream Logic ---
+        function advanceIceCream() {
+            if (iceCreamProgress < MAX_ICE_CREAM_PROGRESS) {
+                iceCreamProgress++;
+                updateIceCreamVisual(iceCreamProgress);
+
+                // Check if ice cream is now complete
+                if (iceCreamProgress === MAX_ICE_CREAM_PROGRESS) {
+                    showYummyMessage();
+                    // Reset after a delay
+                    setTimeout(() => {
+                        iceCreamProgress = 0;
+                        updateIceCreamVisual(0); // Hide all parts
+                    }, 2000); // Wait 2 seconds before resetting
+                }
+            }
+        }
+
+        function updateIceCreamVisual(progress) {
+            // Hide all parts first
+            iceCreamOrder.forEach(partId => {
+                iceCreamParts[partId].classList.remove('visible');
+            });
+            // Show parts up to the current progress level
+            for (let i = 0; i < progress; i++) {
+                const partId = iceCreamOrder[i];
+                if (iceCreamParts[partId]) {
+                    iceCreamParts[partId].classList.add('visible');
+                }
+            }
+        }
+
+        function showYummyMessage() {
+             const yummyPopup = document.createElement('div');
+             yummyPopup.id = 'yummyText'; // Use ID for specific styling
+             yummyPopup.textContent = "Yummy!";
+             overlay.appendChild(yummyPopup); // Add to overlay
+             setTimeout(() => yummyPopup.remove(), 1500); // Remove after animation
+        }
+
+
+        // --- Event Listeners ---
+        canvas.addEventListener('pointerdown', startDrawing);
+        canvas.addEventListener('pointermove', draw);
+        canvas.addEventListener('pointerup', stopDrawing);
+        canvas.addEventListener('pointerleave', stopDrawing);
+        clearBtn.addEventListener('click', clearCanvas);
+        prevBtn.addEventListener('click', () => {
+            if (currentCharacterIndex > 0) {
+                currentCharacterIndex--;
+                updateCharacter();
+            }
+        });
+        nextBtn.addEventListener('click', () => {
+            if (currentCharacterIndex < characters.length - 1) {
+                currentCharacterIndex++;
+                updateCharacter();
+            }
+        });
+
+        // --- Initial setup ---
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(() => {
+             resizeCanvas();
+             updateCharacter();
+             updateIceCreamVisual(iceCreamProgress); // Initialize ice cream visual state
+        }, 0);
+
+    </script>
+
+</body>
+</html>
